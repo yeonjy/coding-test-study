@@ -13,6 +13,7 @@ class PGS_258711 {
     private static boolean[] visited;
     private static int doughnut, stick, eight, generatedNode;
 
+    //노드와 에지의 개수로 그래프 모양 판단
     public int[] solution(int[][] edges) {
 
         int N = 0;  //노드의 수
@@ -55,7 +56,7 @@ class PGS_258711 {
 
     private static void bfs(int start) {
         Queue<Integer> q = new LinkedList<>();
-        List<Integer> nodes = new ArrayList<>();
+        int nodeCount = 0;
         int edgeCount = 0;
 
         q.add(start);
@@ -63,7 +64,7 @@ class PGS_258711 {
 
         while (!q.isEmpty()) {
             Integer cur = q.poll();
-            nodes.add(cur);
+            nodeCount++;
 
             for (Integer next : adjList.get(cur)) {
                 edgeCount++;
@@ -75,7 +76,6 @@ class PGS_258711 {
         }
 
         //노드와 에지의 개수로 그래프 판별
-        int nodeCount = nodes.size();
         if (edgeCount == nodeCount) {
             doughnut++;
         } else if (edgeCount == nodeCount - 1) {
@@ -83,5 +83,42 @@ class PGS_258711 {
         } else if (edgeCount == nodeCount + 1) {
             eight++;
         }
+    }
+
+    //그래프의 특징으로 그래프 판단
+    public int[] solution2(int[][] edges) {
+
+        int N = 0;  //노드의 수
+        for (int[] edge : edges) {
+            N = Math.max(N, Math.max(edge[0], edge[1]));
+        }
+
+        int[] inDegree = new int[N + 1];
+        int[] outDegree = new int[N + 1];
+
+        for (int[] edge : edges) {
+            inDegree[edge[1]]++;
+            outDegree[edge[0]]++;
+        }
+
+        int generatedNode = 0;
+        int stick = 0;
+        int eight = 0;
+
+        for (int i = 1; i <= N; i++) {
+            if (outDegree[i] >= 2) {  //진출 차수가 2 이상이고
+                if (inDegree[i] == 0) {  //진입 차수가 0이면 생성된 노드
+                    generatedNode = i;
+                } else {  //진출 차수가 2인 노드가 존재하면 8자 그래프
+                    eight++;
+                }
+            } else if (outDegree[i] == 0 && inDegree[i] >= 1) {  //진출 차수가 0이고, 진입 차수가 1개 이상이면 막대 그래프
+                stick++;
+            }
+        }
+
+        int doughnut = outDegree[generatedNode] - eight - stick;
+
+        return new int[]{generatedNode, doughnut, stick, eight};
     }
 }
